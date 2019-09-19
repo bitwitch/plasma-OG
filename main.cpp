@@ -89,7 +89,7 @@ public:
         int color_val;
         for(int y = 0; y < HEIGHT; y++) { 
             for(int x = 0; x < WIDTH; x++) { 
-                int color_val = (int)(u8)(plasma1[i_plasma1] + plasma3[i_plasma3] + plasma4[i_plasma4]); // cast to u8 to wrap overflow
+                int color_val = (int)(u8)(plasma1[i_plasma1] + plasma3[i_plasma3] + plasma4[i_plasma4]+ plasma5[i_plasma5]); // cast to u8 to wrap overflow
                 // TODO(shaw): is it significantly faster to write to a 
                 // buffer and draw whole buffer once? and is this possible
                 // in olcPixelEngine?
