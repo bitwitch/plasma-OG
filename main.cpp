@@ -17,15 +17,21 @@ public:
 
     u8 *plasma1; // lookup tables
     u8 *plasma2; // 
+    u8 *plasma3; // 
+    u8 *plasma4; // 
+    u8 *plasma5; // 
     u8 *palette;
 
-    void precalculate_plasma(u8 *buffer1, u8 *buffer2, int w, int h)
+    void precalculate_plasma(u8 *buffer1, u8 *buffer2, u8 *buffer3, u8 *buffer4, u8 *buffer5, int w, int h)
     {
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                buffer1[y*w+x] = (u8)(64 + 63 * sin(hypot(0.5*w - x, 0.5*h - y) * 0.0666));
-                buffer2[y*w+x] = (u8)(64 + 63 * sin((float)x/(37+15*cos((float)y/74)))
+                buffer1[y*w+x] = (u8)(128 + 127 * sin(hypot(0.5*w - x, 0.5*h - y) * 0.0666));
+                buffer2[y*w+x] = (u8)(128 + 127 * sin((float)x/(37+15*cos((float)y/74)))
                                                 * cos((float)y/(31+11*sin((float)x/57))));
+                buffer3[y*w+x] = (u8)(128.0 + 127.0 * sin(x / 16.0));
+                buffer4[y*w+x] = (u8)(128.0 + 127.0 * sin(y / 8.0));
+                buffer5[y*w+x] = (u8)(128.0 + 127.0 * sin((x + y) / 16.0));
             }
         }
     }
@@ -37,24 +43,33 @@ public:
         current_time = 0;
         plasma1 = new u8[WIDTH*2*HEIGHT*2];
         plasma2 = new u8[WIDTH*2*HEIGHT*2];
+        plasma3 = new u8[WIDTH*2*HEIGHT*2];
+        plasma4 = new u8[WIDTH*2*HEIGHT*2];
+        plasma5 = new u8[WIDTH*2*HEIGHT*2];
         palette = new u8[256*3];
 
-        precalculate_plasma(plasma1, plasma2, WIDTH*2, HEIGHT*2);
+        precalculate_plasma(plasma1, plasma2, plasma3, plasma4, plasma4, WIDTH*2, HEIGHT*2);
         return true;    
     }
 
     bool OnUserUpdate(float fElapsedTime) override 
     {
         current_time += fElapsedTime;
-        int x1 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * cos(current_time/9));
-        int x2 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * sin(-current_time/11));
-        int x3 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * sin(-current_time/13));
-        int y1 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * sin(current_time/12));
-        int y2 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * cos(-current_time/7));
-        int y3 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * cos(-current_time/10));
+        int x1 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * cos(current_time/9.7));
+        int x2 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * sin(-current_time/11.4));
+        int x3 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * sin(current_time/13.7));
+        int x4 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * cos(-current_time/11.1));
+        int x5 = (int)(0.5*WIDTH + (0.5*WIDTH-1) * sin(-current_time/9.6));
+        int y1 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * sin(current_time/12.3));
+        int y2 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * cos(-current_time/7.5));
+        int y3 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * cos(current_time/12.4));
+        int y4 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * sin(-current_time/10));
+        int y5 = (int)(0.5*HEIGHT + (0.5*HEIGHT-1) * cos(-current_time/7.9));
         int i_plasma1 = y1 * WIDTH * 2 + x1;
         int i_plasma2 = y2 * WIDTH * 2 + x2;
         int i_plasma3 = y3 * WIDTH * 2 + x3;
+        int i_plasma4 = y4 * WIDTH * 2 + x4;
+        int i_plasma5 = y5 * WIDTH * 2 + x5;
 
         // set color palette
         u8 r, g, b;
@@ -74,7 +89,7 @@ public:
         int color_val;
         for(int y = 0; y < HEIGHT; y++) { 
             for(int x = 0; x < WIDTH; x++) { 
-                int color_val = (int)(u8)(plasma1[i_plasma1] + plasma2[i_plasma2] + plasma2[i_plasma3]); // cast to u8 to wrap overflow
+                int color_val = (int)(u8)(plasma1[i_plasma1] + plasma3[i_plasma3] + plasma4[i_plasma4]); // cast to u8 to wrap overflow
                 // TODO(shaw): is it significantly faster to write to a 
                 // buffer and draw whole buffer once? and is this possible
                 // in olcPixelEngine?
@@ -99,6 +114,9 @@ public:
     {
         delete [] plasma1;
         delete [] plasma2;
+        delete [] plasma3;
+        delete [] plasma4;
+        delete [] plasma5;
         delete [] palette;
         return true;    
     }
